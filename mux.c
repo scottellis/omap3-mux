@@ -103,8 +103,6 @@ static int mux_init(void)
 {
 	int error;
 
-	printk(KERN_ALERT "mux_init\n");
-
 	if ((error = alloc_chrdev_region(&dev, 0, DEVCOUNT, "mux")) < 0) {
 		printk(KERN_ALERT 
 			"alloc_chrdev_region() failed: error = %d \n", 
@@ -129,8 +127,6 @@ static int mux_init(void)
 
 static void mux_exit(void)
 {
-	printk(KERN_ALERT "mux_exit\n");
-
 	cdev_del(cdev_p);
 	unregister_chrdev_region(dev, DEVCOUNT);
 }
