@@ -1,12 +1,12 @@
-A very small kernel module that lets you look at the PADCONF register
-for a given GPIO. 
+A small kernel module that lets you look at the current PADCONF register
+value for a given GPIO. 
 
 It should work for any OMAP34XX board, but I've only tested it with
 Overo's. I wrote in only because I keep forgetting to mark the 
 microSD cards with the different u-boot muxings I've been playing 
 around with.
 
-The output is similar to the u-boot muxing file overo.h
+The output is similar to the u-boot muxing file board/overo/overo.h
 
 To build it, you need a cross-compile environment and the source tree
 for the current kernel that you are running on the device.
@@ -14,26 +14,47 @@ for the current kernel that you are running on the device.
 If you are using OE, then you can source the source-me.txt file in 
 the project. Just make sure KERNELDIR is correct.
 
-After that, to build it just run make.
+After that, run make to build.
 
 The module will be called mux.ko
 
-To use, copy it to your device and load it with insmod.
+Copy it to your device and load it with insmod.
 
-When it loads it will tell you the command to run to create the
-character special file in /dev.
+When it loads it the module will spit out a message telling you 
+the command to run to create the character special file in /dev.
 
-To use it just send it a gpio number and it will give you back
-the PADCONF register value corresponding to the GPIO on the 
-console. 
+Then send it a gpio number and it will give you back the PADCONF 
+register value corresponding to the GPIO on the console. 
 
-A few GPIO appear more then once in table 7.5 of the OMAP3 TRM. 
-For those pins you will get two lines of output.
+Write is the only I/O operation the module responds to.
+
+A few GPIO appear more then once in table 7.5 of the OMAP3 TRM, for those
+pins you will get two lines of output. You can find the TRM here
+ 
+http://wiki.davincidsp.com/index.php/OMAP35x_Technical_Reference_Manual_(TRM)
      
+Output format
+[padconf_register_address] GPIO_XXX ([16-bit padconf_reg_value]) : [disection]
+
+Disection
+
+IEN - Input Enable
+IDIS - Input Disable
+PTD - Pull type Down
+PTU - Pull type Up
+DIS - Pull type selection is inactive
+EN - Pull type selection is active
+
+If for some reason the value the module is putting out doesn't look right,
+verify that I got the gpio to padconf register mapping correct (gp_map) in
+mux.c. There was plenty of opportunity for typos there. I've really only
+verified the GPIO I'm interested in. 
+
 
 Sample session
 
 [copy mux.ko to the overo]
+
 root@overo:~# ls
 mux.ko
 
