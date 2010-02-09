@@ -2,9 +2,8 @@ A small kernel module that lets you look at the current PADCONF register
 value for a given GPIO. 
 
 It should work for any OMAP34XX board, but I've only tested it with
-Overo's. I wrote in only because I keep forgetting to mark the 
-microSD cards with the different u-boot muxings I've been playing 
-around with.
+Overo's. I wrote it because I keep forgetting to mark the microSD cards 
+with the different u-boot muxings I've been playing around with.
 
 The output is similar to the u-boot muxing file board/overo/overo.h
 
@@ -35,6 +34,9 @@ http://wiki.davincidsp.com/index.php/OMAP35x_Technical_Reference_Manual_(TRM)
      
 Output format
 [padconf_register_address] GPIO_XXX ([16-bit padconf_reg_value]) : [disection]
+
+The address is at 16-bit resolution as opposed to the TRM Table 7.5's 32-bit
+level. 
 
 Disection
 
