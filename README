@@ -1,18 +1,20 @@
 A very small kernel module that lets you look at the PADCONF register
-for the GPIO number that you provide. 
+for a given GPIO. 
 
 It should work for any OMAP34XX board, but I've only tested it with
-Overo's.
+Overo's. I wrote in only because I keep forgetting to mark the 
+microSD cards with the different u-boot muxings I've been playing 
+around with.
 
 The output is similar to the u-boot muxing file overo.h
 
 To build it, you need a cross-compile environment and the source tree
-for the current kernel on the device.
+for the current kernel that you are running on the device.
 
 If you are using OE, then you can source the source-me.txt file in 
 the project. Just make sure KERNELDIR is correct.
 
-After that, just run make to build it.
+After that, to build it just run make.
 
 The module will be called mux.ko
 
@@ -21,10 +23,12 @@ To use, copy it to your device and load it with insmod.
 When it loads it will tell you the command to run to create the
 character special file in /dev.
 
-To use it just write a gpio number and it will give you back
+To use it just send it a gpio number and it will give you back
 the PADCONF register value corresponding to the GPIO on the 
-console. A few GPIO appear more then once in table 7.5 of the
-OMAP3 TRM. For those pins you will get two lines of output.
+console. 
+
+A few GPIO appear more then once in table 7.5 of the OMAP3 TRM. 
+For those pins you will get two lines of output.
      
 
 Sample session
