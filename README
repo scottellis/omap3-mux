@@ -1,0 +1,54 @@
+A very small kernel module that lets you look at the PADCONF register
+for the GPIO number that you provide. 
+
+It should work for any OMAP34XX board, but I've only tested it with
+Overo's.
+
+The output is similar to the u-boot muxing file overo.h
+
+To build it, you need a cross-compile environment and the source tree
+for the current kernel on the device.
+
+If you are using OE, then you can source the source-me.txt file in 
+the project. Just make sure KERNELDIR is correct.
+
+After that, just run make to build it.
+
+The module will be called mux.ko
+
+To use, copy it to your device and load it with insmod.
+
+When it loads it will tell you the command to run to create the
+character special file in /dev.
+
+To use it just write a gpio number and it will give you back
+the PADCONF register value corresponding to the GPIO on the 
+console. A few GPIO appear more then once in table 7.5 of the
+OMAP3 TRM. For those pins you will get two lines of output.
+     
+
+Sample session
+
+[copy mux.ko to the overo]
+root@overo:~# ls
+mux.ko
+
+root@overo:~# insmod mux.ko 
+Verify : mknod /dev/mux c 251 0
+
+root@overo:~# ls -all /dev/mux
+ls: cannot access /dev/mux: No such file or directory
+
+root@overo:~# mknod /dev/mux c 251 0
+
+root@overo:~# ls -all /dev/mux
+crw-r--r-- 1 root root 251, 0 Feb  7 12:42 /dev/mux
+
+root@overo:~# echo 170 > /dev/mux
+0x480021c6  GPIO_170 (0x001c) : IDIS | PTU | EN | M4
+
+root@overo:~# echo 146 > /dev/mux
+0x48002178  GPIO_146 (0x0104) : IEN | PTD | DIS | M4
+
+root@overo:~# rmmod mux
+
