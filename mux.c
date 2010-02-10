@@ -12,6 +12,7 @@
 #define OMAP34XX_PADCONF_SIZE	0x05cc
 #define MAX_GPIO 		192 /* (OMAP34XX_NR_GPIOS * 32) */  
 
+
 /*
  * IEN  - Input Enable
  * IDIS - Input Disable
@@ -31,6 +32,26 @@
 static int gp_map[MAX_GPIO];
 static int alt_map[MAX_GPIO];
 
+#define GPIO_OE_REG_OFFSET	0x0034
+#define OMAP34XX_GPIO1_BASE	0x48310000
+#define OMAP34XX_GPIO2_BASE	0x49050000
+#define OMAP34XX_GPIO3_BASE	0x49052000
+#define OMAP34XX_GPIO4_BASE	0x49054000
+#define OMAP34XX_GPIO5_BASE	0x49056000
+#define OMAP34XX_GPIO6_BASE	0x49058000
+ 
+
+static int gpio_bank[6] = {
+	OMAP34XX_GPIO1_BASE,
+	OMAP34XX_GPIO2_BASE,
+	OMAP34XX_GPIO3_BASE,
+	OMAP34XX_GPIO4_BASE,
+	OMAP34XX_GPIO5_BASE,
+	OMAP34XX_GPIO6_BASE
+};
+
+	
+
 static void init_gpio_padconf_mapping(void);
 
 static dev_t dev;
@@ -40,7 +61,9 @@ static ssize_t mux_write(struct file *filp, const char __user *buff,
 	size_t count, loff_t *offp)
 {
 	unsigned long gpio;
-	unsigned int pad;
+	unsigned int reg;
+	unsigned int bank;
+	unsigned int bit;
 	void __iomem *base;
 	char *p;
 
@@ -62,32 +85,53 @@ static ssize_t mux_write(struct file *filp, const char __user *buff,
 	base = ioremap(OMAP34XX_PADCONF_START, OMAP34XX_PADCONF_SIZE);
 
 	if (base) {
-		pad = ioread16(base + gp_map[gpio]);
+		reg = ioread16(base + gp_map[gpio]);
 
 		printk(KERN_ALERT "0x%lx  GPIO_%lu (0x%04x) : %s | %s | %s | M%u\n",
 			(unsigned long) OMAP34XX_PADCONF_START + gp_map[gpio],
-			 gpio, pad, 
-			pad & IEN ? "IEN" : "IDIS", 
-			pad & PTU ? "PTU" : "PTD",
-			pad & EN ? "EN" : "DIS",
-			pad & 0x0007);
+			 gpio, reg, 
+			reg & IEN ? "IEN" : "IDIS", 
+			reg & PTU ? "PTU" : "PTD",
+			reg & EN ? "EN" : "DIS",
+			reg & 0x0007);
 
 		if (alt_map[gpio] > 0) {
-			pad = ioread16(base + alt_map[gpio]);
+			reg = ioread16(base + alt_map[gpio]);
 
 			printk(KERN_ALERT "0x%lx  GPIO_%lu (0x%04x) : %s | %s | %s | M%u\n",
 				(unsigned long) OMAP34XX_PADCONF_START + alt_map[gpio],
-				gpio, pad, 
-				pad & IEN ? "IEN" : "IDIS",
-				pad & PTU ? "PTU" : "PTD",
-				pad & EN ? "EN" : "DIS",
-				pad & 0x0007);
+				gpio, reg, 
+				reg & IEN ? "IEN" : "IDIS",
+				reg & PTU ? "PTU" : "PTD",
+				reg & EN ? "EN" : "DIS",
+				reg & 0x0007);
 		}	
 
 		iounmap(base);
+
+		bank = gpio >> 5;
+		bit = gpio & 0x001f;
+
+		base = ioremap(gpio_bank[bank], 1024);
+
+		if (base) {
+			reg = ioread32(base + GPIO_OE_REG_OFFSET); 	
+
+			printk(KERN_ALERT "0x%0x  GPIO_OE[%u] : 0x%08X bit %u is %s\n",
+				gpio_bank[bank] + GPIO_OE_REG_OFFSET,
+				bank,
+				reg,
+				bit,
+				reg & (1 << bit) ? "ON (input)" : "OFF (output)"); 
+
+			iounmap(base);
+		}
+		else {
+			printk(KERN_ALERT "ioremap(GPIO_OE) failed\n");
+		}
 	}
 	else {
-		printk(KERN_ALERT "ioremap() failed\n");
+		printk(KERN_ALERT "ioremap(PADCONF) failed\n");
 	}
  	
 	return count;
