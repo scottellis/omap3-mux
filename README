@@ -1,5 +1,6 @@
 A small kernel module that lets you look at the current PADCONF register
-value for a given GPIO. 
+value for a given GPIO. It also shows the GPIO_OE register status for
+the GPIO in question. 
 
 It should work for any OMAP34XX board, but I've only tested it with
 Overo's. I wrote it because I keep forgetting to mark the microSD cards 
@@ -34,6 +35,7 @@ http://wiki.davincidsp.com/index.php/OMAP35x_Technical_Reference_Manual_(TRM)
      
 Output format
 [padconf_register_address] GPIO_XXX ([16-bit padconf_reg_value]) : [disection]
+[gpio_oe_register_address] GPIO_OE[bank] : [gpio_oe_reg_value] (bit state) 
 
 The address is at 16-bit resolution as opposed to the TRM Table 7.5's 32-bit
 level. 
@@ -73,9 +75,23 @@ crw-r--r-- 1 root root 251, 0 Feb  7 12:42 /dev/mux
 
 root@overo:~# echo 170 > /dev/mux
 0x480021c6  GPIO_170 (0x001c) : IDIS | PTU | EN | M4
+0x49058034 GPIO_OE[5] : 0xFF7FFEEF bit 10 is ON (input)
+
+root@overo:/sys/class/gpio# echo 170 > export
+
+root@overo:/sys/class/gpio# echo 170 > /dev/mux
+0x480021c6  GPIO_170 (0x001c) : IDIS | PTU | EN | M4
+0x49058034 GPIO_OE[5] : 0xFF7FFEEF bit 10 is ON (input)
+
+root@overo:/sys/class/gpio# echo out > gpio170/direction
+
+root@overo:/sys/class/gpio# echo 170 > /dev/mux
+0x480021c6  GPIO_170 (0x001c) : IDIS | PTU | EN | M4
+0x49058034 GPIO_OE[5] : 0xFF7FFAEF bit 10 is OFF (output)
 
 root@overo:~# echo 146 > /dev/mux
 0x48002178  GPIO_146 (0x0104) : IEN | PTD | DIS | M4
+0x49056034 GPIO_OE[4] : 0xFFFFFFFF bit 18 is ON (input)
 
 root@overo:~# rmmod mux
 
