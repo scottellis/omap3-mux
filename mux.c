@@ -4,6 +4,7 @@
 #include <linux/fs.h>
 #include <mach/gpio.h>
 #include <asm/io.h>
+#include <asm/uaccess.h>
 #include <plat/mux.h>
 
 #define DEVCOUNT 1
@@ -64,13 +65,21 @@ static ssize_t mux_write(struct file *filp, const char __user *buff,
 	unsigned int reg;
 	unsigned int bank;
 	unsigned int bit;
+	char cbuff[8];
 	void __iomem *base;
 	char *p;
 
 	if (count < 1)
 		return 0;
-	
-	gpio = simple_strtoul(buff, &p, 10);
+
+	if (count > 4) 
+		count = 4;
+
+	memset(cbuff, 0, sizeof(cbuff));
+	if (copy_from_user(cbuff, buff, count)) 
+		return -EFAULT;
+		
+	gpio = simple_strtoul(cbuff, &p, 10);
 
 	if (p == buff) {
 		printk(KERN_ALERT "Give me a GPIO number\n");
