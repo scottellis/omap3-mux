@@ -1,13 +1,12 @@
 #include <linux/init.h>
 #include <linux/module.h>
+#include <linux/device.h>
 #include <linux/cdev.h>
 #include <linux/fs.h>
 #include <mach/gpio.h>
 #include <asm/io.h>
 #include <asm/uaccess.h>
 #include <plat/mux.h>
-
-#define DEVCOUNT 1
 
 #define OMAP34XX_PADCONF_START	0x48002030
 #define OMAP34XX_PADCONF_SIZE	0x05cc
@@ -51,20 +50,26 @@ static int gpio_bank[6] = {
 	OMAP34XX_GPIO6_BASE
 };
 
-	
 
 static void init_gpio_padconf_mapping(void);
 
-static dev_t dev;
-static struct cdev *cdev_p;
+struct mux_dev {
+	dev_t devt;
+	struct semaphore sem; 
+	struct cdev cdev;
+	struct class *class;
+};
+
+static struct mux_dev mux_dev;
+
 
 static ssize_t mux_write(struct file *filp, const char __user *buff, 
 	size_t count, loff_t *offp)
 {
 	unsigned long gpio;
-	unsigned int reg;
-	unsigned int bank;
-	unsigned int bit;
+	unsigned int reg, bank, bit;
+	ssize_t status;
+	size_t len;
 	char cbuff[8];
 	void __iomem *base;
 	char *p;
@@ -72,23 +77,30 @@ static ssize_t mux_write(struct file *filp, const char __user *buff,
 	if (count < 1)
 		return 0;
 
-	if (count > 4) 
-		count = 4;
+	if (down_interruptible(&mux_dev.sem))
+		return -ERESTARTSYS;
+
+	len = (count > 4) ? 4 : count;
 
 	memset(cbuff, 0, sizeof(cbuff));
-	if (copy_from_user(cbuff, buff, count)) 
-		return -EFAULT;
+
+	if (copy_from_user(cbuff, buff, len)) {
+		status = -EFAULT;
+		goto mux_write_done;
+	}
 		
 	gpio = simple_strtoul(cbuff, &p, 10);
 
 	if (p == buff) {
 		printk(KERN_ALERT "Give me a GPIO number\n");
-		return count;
+		status = -EINVAL;
+		goto mux_write_done;
 	}
  
 	if (gpio >= MAX_GPIO || gp_map[gpio] < 0) {
 		printk(KERN_ALERT "GPIO_%lu is not available\n", gpio);
-		return count;
+		status = -EINVAL;
+		goto mux_write_done;
 	} 
 
 	base = ioremap(OMAP34XX_PADCONF_START, OMAP34XX_PADCONF_SIZE);
@@ -137,51 +149,103 @@ static ssize_t mux_write(struct file *filp, const char __user *buff,
 		}
 		else {
 			printk(KERN_ALERT "ioremap(GPIO_OE) failed\n");
+			status = -EIO;
+			goto mux_write_done;
 		}
 	}
 	else {
 		printk(KERN_ALERT "ioremap(PADCONF) failed\n");
+		status = -EIO;
+		goto mux_write_done;
 	}
- 	
-	return count;
+ 
+	status = count;
+
+mux_write_done:
+
+	up(&mux_dev.sem);
+	
+	return status;
 }
 
-static struct file_operations mux_ops = {
+static struct file_operations mux_fops = {
 	.owner = THIS_MODULE,
 	.write = mux_write,
 };
 
- 
-static int mux_init(void)
+static int __init mux_init_cdev(void)
 {
 	int error;
 
-	if ((error = alloc_chrdev_region(&dev, 0, DEVCOUNT, "mux")) < 0) {
+	mux_dev.devt = MKDEV(0, 0);
+
+	error = alloc_chrdev_region(&mux_dev.devt, 0, 1, "mux");
+
+	if (error < 0) {
 		printk(KERN_ALERT 
 			"alloc_chrdev_region() failed: error = %d \n", 
 			error);
-		return 1;
+		
+		return -1;
 	}
 
-	cdev_p = cdev_alloc();
-	cdev_p->ops = &mux_ops;
-	error = cdev_add(cdev_p, dev, DEVCOUNT);
+	cdev_init(&mux_dev.cdev, &mux_fops);
+	mux_dev.cdev.owner = THIS_MODULE;
+
+	error = cdev_add(&mux_dev.cdev, mux_dev.devt, 1);
 	if (error) {
 		printk(KERN_ALERT "cdev_add() failed: error = %d\n", error);
-		return 1;
+		cdev_del(&mux_dev.cdev);			
+		return -1;
 	}	
 
-	init_gpio_padconf_mapping();
+	return 0;
+}
+ 
+static int __init mux_init_class(void)
+{
+	mux_dev.class = class_create(THIS_MODULE, "mux");
 
-	printk(KERN_ALERT "Verify : mknod /dev/mux c %d %d\n", MAJOR(dev), MINOR(dev));
-	
+	if (!mux_dev.class) {
+		printk(KERN_ALERT "class_create() failed\n");
+		return -1;
+	}
+
+	if (!device_create(mux_dev.class, NULL, mux_dev.devt, NULL, "mux")) {
+		class_destroy(mux_dev.class);
+		return -1;
+	}
+
 	return 0;
 }
 
-static void mux_exit(void)
+static int __init mux_init(void)
 {
-	cdev_del(cdev_p);
-	unregister_chrdev_region(dev, DEVCOUNT);
+	memset(&mux_dev, 0, sizeof(struct mux_dev));
+
+	sema_init(&mux_dev.sem, 1);
+
+	if (mux_init_cdev())
+		return -1;
+
+	if (mux_init_class()) {
+		cdev_del(&mux_dev.cdev);
+		unregister_chrdev_region(mux_dev.devt, 1);
+		return -1;
+	}
+
+	init_gpio_padconf_mapping();
+
+	return 0;
+}
+
+static void __exit mux_exit(void)
+{
+	device_destroy(mux_dev.class, mux_dev.devt);
+	class_destroy(mux_dev.class);
+
+	cdev_del(&mux_dev.cdev);
+	unregister_chrdev_region(mux_dev.devt, 1);	
 }
 
 
@@ -404,7 +468,7 @@ static void init_gpio_padconf_mapping(void)
 module_init(mux_init);
 module_exit(mux_exit);
 
-MODULE_LICENSE("Dual BSD/GPL");
-MODULE_AUTHOR("Scott Ellis - Jumpnow Technologies");
+MODULE_LICENSE("GPL");
+MODULE_AUTHOR("Scott Ellis - Jumpnow");
 MODULE_DESCRIPTION("Dev use. Show the PADCONF register GPIO muxing for OMAP3"); 
 
