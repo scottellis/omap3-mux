@@ -20,10 +20,9 @@ The module will be called mux.ko
 
 Copy it to your device and load it with insmod.
 
-When it loads it the module will spit out a message telling you 
-the command to run to create the character special file in /dev.
+When the module loads a /dev/mux special file will be created. 
 
-Then send it a gpio number and it will give you back the PADCONF 
+Send it a gpio number and it will give you back the PADCONF 
 register value corresponding to the GPIO on the console. 
 
 Write is the only I/O operation the module responds to.
@@ -63,12 +62,6 @@ root@overo:~# ls
 mux.ko
 
 root@overo:~# insmod mux.ko 
-Verify : mknod /dev/mux c 251 0
-
-root@overo:~# ls -all /dev/mux
-ls: cannot access /dev/mux: No such file or directory
-
-root@overo:~# mknod /dev/mux c 251 0
 
 root@overo:~# ls -all /dev/mux
 crw-r--r-- 1 root root 251, 0 Feb  7 12:42 /dev/mux
