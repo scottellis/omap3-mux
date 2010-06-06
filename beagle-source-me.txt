@@ -4,8 +4,8 @@ if [[ -z "${KERNEL_CROSS_BUILD_ENVIRONMENT_SOURCED}" ]]; then
 
 	# normally OETMP will be ${OETREE}/tmp, but really it is whatever TMPDIR
 	# in ${OETREE}/build/conf/local.conf points to.
-	# OETMP=${OETREE}/tmp
-	OETMP=/beagle
+	OETMP=${OETREE}/tmp
+	# OETMP=/beagle
 
 	SYSROOTSDIR=${OETMP}/sysroots
 	STAGEDIR=${SYSROOTSDIR}/`uname -m`-linux
