@@ -11,8 +11,9 @@ The output is similar to the u-boot muxing file board/overo/overo.h
 To build it, you need a cross-compile environment and the source tree
 for the current kernel that you are running on the device.
 
-If you are using OE, then you can source the source-me.txt file in 
-the project. Just make sure KERNELDIR is correct.
+If you are using OE, then you can source the appropriate <board>-source-me.txt 
+file in the project. There is one for overo and another for the beagleboard.
+That's all I've tested.
 
 After that, run make to build.
 
