@@ -12,7 +12,7 @@ if [[ -z "${KERNEL_CROSS_BUILD_ENVIRONMENT_SOURCED}" ]]; then
 
 	export KERNELDIR=${SYSROOTSDIR}/${MACHINE}-angstrom-linux-gnueabi/kernel
 
-	PATH=${PATH}:${STAGEDIR}/bin:${PATH}:${STAGEDIR}/armv7a/bin:${PATH}
+	PATH=${PATH}:${STAGEDIR}/bin:${STAGEDIR}/armv7a/bin
 
 	unset CFLAGS CPPFLAGS CXXFLAGS LDFLAGS MACHINE
 
