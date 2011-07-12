@@ -262,6 +262,17 @@ static void init_gpio_padconf_mapping(void)
 	}
 
 	gp_map[0] = 0x21E0;
+	gp_map[1] = 0x2A06;
+	gp_map[2] = 0x2A0A;
+	gp_map[3] = 0x2A0C;
+	gp_map[4] = 0x2A0E;
+	gp_map[5] = 0x2A10;
+	gp_map[6] = 0x2A12;
+	gp_map[7] = 0x2A14;
+	gp_map[8] = 0x2A16;
+	gp_map[9] = 0x2A18;
+	gp_map[10] = 0x2A1A;
+	gp_map[11] = 0x2A24;
 	gp_map[12] = 0x25D8;
 	gp_map[13] = 0x25DA;
 	gp_map[14] = 0x25DC;
@@ -280,6 +291,9 @@ static void init_gpio_padconf_mapping(void)
 	gp_map[27] = 0x25F6;
 	gp_map[28] = 0x25F8;
 	gp_map[29] = 0x25FA;
+	gp_map[30] = 0x2A08;
+	gp_map[31] = 0x2A26;
+	gp_map[32] = 0x223A;
 	gp_map[34] = 0x207A;
 	gp_map[35] = 0x207C;
 	gp_map[36] = 0x207E;
@@ -452,7 +466,7 @@ static void init_gpio_padconf_mapping(void)
 	gp_map[184] = 0x21C2;
 	gp_map[185] = 0x21C4;
 	gp_map[186] = 0x21E2;
-
+	gp_map[187] = 0x2238;
 	gp_map[188] = 0x21B2;
 	gp_map[189] = 0x21B4;
 	gp_map[190] = 0x21B6;
