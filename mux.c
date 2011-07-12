@@ -447,7 +447,7 @@ static void init_gpio_padconf_mapping(void)
 	gp_map[165] = 0x219E;
 	gp_map[166] = 0x21A0;
 	gp_map[167] = 0x2130;
-	gp_map[168] = 0x21BA;
+	gp_map[168] = 0x21BE;
 	gp_map[169] = 0x21B0;
 	gp_map[170] = 0x21C6;
 	gp_map[171] = 0x21C8;
