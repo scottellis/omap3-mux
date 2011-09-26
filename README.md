@@ -46,18 +46,19 @@ register value corresponding to the GPIO on the console.
 Write is the only I/O operation the module responds to.
 
 A few GPIO appear more then once in table 7.5 of the OMAP3 TRM, for those
-pins you will get two lines of output. You can find the TRM here
- 
-http://wiki.davincidsp.com/index.php/OMAP35x_Technical_Reference_Manual_(TRM)
+pins you will get two lines of output. 
+
+You can find the TRM here [http://www-s.ti.com/sc/techlit/spruf98]
      
 Output format
-[padconf_register_address] GPIO_XXX ([16-bit padconf_reg_value]) : [disection]
-[gpio_oe_register_address] GPIO_OE[bank] : [gpio_oe_reg_value] (bit state) 
 
-The address is at 16-bit resolution as opposed to the TRM Table 7.5's 32-bit
-level. 
+	[padconf_register_address] GPIO_XXX ([16-bit padconf_reg_value]) : [flags]		
+	[gpio_oe_register_address] GPIO_OE[bank] : [gpio_oe_reg_value] (bit state) 
 
-Disection
+
+The address is at 16-bit resolution as opposed to the TRM Table 7.5's 32-bit level. 
+
+Flags
 
 IEN - Input Enable
 IDIS - Input Disable
