@@ -19,19 +19,19 @@ After that, run make to build.
 
 Here's an example.
 
-$ git clone git://github.com/scottellis/omap3-mux.git
-$ cd omap3-mux
-$ [optional] export OETMP=/oe1
-$ . overo-source-me.txt 
-$ make
-make -C /oe1/sysroots/overo-angstrom-linux-gnueabi/kernel M=/home/scott/examples/omap3-mux modules 
-make[1]: Entering directory `/oe1/sysroots/overo-angstrom-linux-gnueabi/kernel'
-  CC [M]  /home/scott/examples/omap3-mux/mux.o
-  Building modules, stage 2.
-  MODPOST 1 modules
-  CC      /home/scott/examples/omap3-mux/mux.mod.o
-  LD [M]  /home/scott/examples/omap3-mux/mux.ko
-make[1]: Leaving directory `/oe1/sysroots/overo-angstrom-linux-gnueabi/kernel'
+	$ git clone git://github.com/scottellis/omap3-mux.git
+	$ cd omap3-mux
+	$ [optional] export OETMP=/oe1
+	$ . overo-source-me.txt 
+	$ make
+	make -C /oe1/sysroots/overo-angstrom-linux-gnueabi/kernel M=/home/scott/examples/omap3-mux modules 
+	make[1]: Entering directory `/oe1/sysroots/overo-angstrom-linux-gnueabi/kernel'
+	  CC [M]  /home/scott/examples/omap3-mux/mux.o
+	  Building modules, stage 2.
+	  MODPOST 1 modules
+	  CC      /home/scott/examples/omap3-mux/mux.mod.o
+	  LD [M]  /home/scott/examples/omap3-mux/mux.ko
+	make[1]: Leaving directory `/oe1/sysroots/overo-angstrom-linux-gnueabi/kernel'
 
 
 The module will be called mux.ko
@@ -76,33 +76,34 @@ Sample session
 
 [copy mux.ko to the overo]
 
-root@overo:~# ls
-mux.ko
+	root@overo:~# ls
+	mux.ko
 
-root@overo:~# insmod mux.ko 
+	root@overo:~# insmod mux.ko 
 
-root@overo:~# ls -all /dev/mux
-crw-r--r-- 1 root root 251, 0 Feb  7 12:42 /dev/mux
+	root@overo:~# ls -all /dev/mux
+	crw-r--r-- 1 root root 251, 0 Feb  7 12:42 /dev/mux
 
-root@overo:~# echo 170 > /dev/mux
-0x480021c6  GPIO_170 (0x001c) : IDIS | PTU | EN | M4
-0x49058034 GPIO_OE[5] : 0xFF7FFEEF bit 10 is ON (input)
+	root@overo:~# echo 170 > /dev/mux
+	0x480021c6  GPIO_170 (0x001c) : IDIS | PTU | EN | M4
+	0x49058034 GPIO_OE[5] : 0xFF7FFEEF bit 10 is ON (input)
 
-root@overo:/sys/class/gpio# echo 170 > export
+	root@overo:/sys/class/gpio# echo 170 > export
 
-root@overo:/sys/class/gpio# echo 170 > /dev/mux
-0x480021c6  GPIO_170 (0x001c) : IDIS | PTU | EN | M4
-0x49058034 GPIO_OE[5] : 0xFF7FFEEF bit 10 is ON (input)
+	root@overo:/sys/class/gpio# echo 170 > /dev/mux
+	0x480021c6  GPIO_170 (0x001c) : IDIS | PTU | EN | M4
+	0x49058034 GPIO_OE[5] : 0xFF7FFEEF bit 10 is ON (input)
 
-root@overo:/sys/class/gpio# echo out > gpio170/direction
+	root@overo:/sys/class/gpio# echo out > gpio170/direction
 
-root@overo:/sys/class/gpio# echo 170 > /dev/mux
-0x480021c6  GPIO_170 (0x001c) : IDIS | PTU | EN | M4
-0x49058034 GPIO_OE[5] : 0xFF7FFAEF bit 10 is OFF (output)
+	root@overo:/sys/class/gpio# echo 170 > /dev/mux
+	0x480021c6  GPIO_170 (0x001c) : IDIS | PTU | EN | M4
+	0x49058034 GPIO_OE[5] : 0xFF7FFAEF bit 10 is OFF (output)
 
-root@overo:~# echo 146 > /dev/mux
-0x48002178  GPIO_146 (0x0104) : IEN | PTD | DIS | M4
-0x49056034 GPIO_OE[4] : 0xFFFFFFFF bit 18 is ON (input)
+	root@overo:~# echo 146 > /dev/mux
+	0x48002178  GPIO_146 (0x0104) : IEN | PTD | DIS | M4
+	0x49056034 GPIO_OE[4] : 0xFFFFFFFF bit 18 is ON (input)
 
-root@overo:~# rmmod mux
+	root@overo:~# rmmod mux
+
 
