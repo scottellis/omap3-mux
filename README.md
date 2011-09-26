@@ -50,6 +50,7 @@ pins you will get two lines of output.
 
 You can find the TRM here [http://www-s.ti.com/sc/techlit/spruf98]
      
+
 Output format
 
 	[padconf_register_address] GPIO_XXX ([16-bit padconf_reg_value]) : [flags]		
@@ -60,12 +61,12 @@ The address is at 16-bit resolution as opposed to the TRM Table 7.5's 32-bit lev
 
 Flags
 
-IEN - Input Enable
-IDIS - Input Disable
-PTD - Pull type Down
-PTU - Pull type Up
-DIS - Pull type selection is inactive
-EN - Pull type selection is active
+	IEN - Input Enable
+	IDIS - Input Disable
+	PTD - Pull type Down
+	PTU - Pull type Up
+	DIS - Pull type selection is inactive
+	EN - Pull type selection is active
 
 If for some reason the value the module is putting out doesn't look right,
 verify that I got the gpio to padconf register mapping correct (gp_map) in
