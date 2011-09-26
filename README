@@ -17,6 +17,23 @@ That's all I've tested.
 
 After that, run make to build.
 
+Here's an example.
+
+$ git clone git://github.com/scottellis/omap3-mux.git
+$ cd omap3-mux
+$ [optional] export OETMP=/oe1
+$ . overo-source-me.txt 
+$ make
+make -C /oe1/sysroots/overo-angstrom-linux-gnueabi/kernel M=/home/scott/examples/omap3-mux modules 
+make[1]: Entering directory `/oe1/sysroots/overo-angstrom-linux-gnueabi/kernel'
+  CC [M]  /home/scott/examples/omap3-mux/mux.o
+  Building modules, stage 2.
+  MODPOST 1 modules
+  CC      /home/scott/examples/omap3-mux/mux.mod.o
+  LD [M]  /home/scott/examples/omap3-mux/mux.ko
+make[1]: Leaving directory `/oe1/sysroots/overo-angstrom-linux-gnueabi/kernel'
+
+
 The module will be called mux.ko
 
 Copy it to your device and load it with insmod.
