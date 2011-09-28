@@ -180,23 +180,16 @@ static int __init mux_init_cdev(void)
 	mux_dev.devt = MKDEV(0, 0);
 
 	error = alloc_chrdev_region(&mux_dev.devt, 0, 1, "mux");
-
-	if (error < 0) {
-		printk(KERN_ALERT 
-			"alloc_chrdev_region() failed: error = %d \n", 
-			error);
-		
-		return -1;
-	}
+	if (error)
+		return error;
 
 	cdev_init(&mux_dev.cdev, &mux_fops);
 	mux_dev.cdev.owner = THIS_MODULE;
 
 	error = cdev_add(&mux_dev.cdev, mux_dev.devt, 1);
 	if (error) {
-		printk(KERN_ALERT "cdev_add() failed: error = %d\n", error);
 		cdev_del(&mux_dev.cdev);			
-		return -1;
+		return error;
 	}	
 
 	return 0;
@@ -204,16 +197,18 @@ static int __init mux_init_cdev(void)
  
 static int __init mux_init_class(void)
 {
+	struct device *device;
+
 	mux_dev.class = class_create(THIS_MODULE, "mux");
 
-	if (!mux_dev.class) {
-		printk(KERN_ALERT "class_create() failed\n");
-		return -1;
-	}
+	if (IS_ERR(mux_dev.class))
+		return PTR_ERR(mux_dev.class);
 
-	if (!device_create(mux_dev.class, NULL, mux_dev.devt, NULL, "mux")) {
+	device = device_create(mux_dev.class, NULL, mux_dev.devt, NULL, "mux");
+
+	if (IS_ERR(device)) {
 		class_destroy(mux_dev.class);
-		return -1;
+		return PTR_ERR(device);
 	}
 
 	return 0;
@@ -221,8 +216,6 @@ static int __init mux_init_class(void)
 
 static int __init mux_init(void)
 {
-	memset(&mux_dev, 0, sizeof(struct mux_dev));
-
 	sema_init(&mux_dev.sem, 1);
 
 	if (mux_init_cdev())
@@ -247,7 +240,6 @@ static void __exit mux_exit(void)
 	cdev_del(&mux_dev.cdev);
 	unregister_chrdev_region(mux_dev.devt, 1);	
 }
-
 
 /*
   Until I figure out where the friggin mapping logic happens in the kernel...
